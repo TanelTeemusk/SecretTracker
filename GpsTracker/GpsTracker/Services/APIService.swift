@@ -68,20 +68,6 @@ final class APIService {
         }
     }
 
-    private func performRequestWithoutResponse(_ request: URLRequest) async throws -> APIResponse {
-        let (_, response) = try await URLSession.shared.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.invalidResponse
-        }
-        
-        if (200...299).contains(httpResponse.statusCode) {
-            return APIResponse.success(statusCode: httpResponse.statusCode)
-        } else {
-            return APIResponse.failure(statusCode: httpResponse.statusCode)
-        }
-    }
-
     // MARK: - OAuth Token Management
 
     func getValidToken() async throws -> String {

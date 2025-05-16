@@ -18,24 +18,10 @@ enum AppConfig {
         }
     }
     
-    // MARK: - Location Configuration
-    enum Location {
-        static let minimumAccuracy: Double = 10.0 // meters
-        static let minimumTimeInterval: TimeInterval = 10.0 // seconds
-        static let desiredAccuracy: Double = kCLLocationAccuracyBest
-        static let distanceFilter: Double = 10.0 // meters
-    }
-    
     // MARK: - Storage Configuration
     enum Storage {
         static let maxStoredLocations = 1000
         static let locationDataKey = "savedLocations"
         static let retryStateKey = "lastRetryAttempt"
-    }
-    
-    // MARK: - UI Configuration
-    enum UI {
-        static let mapZoomLevel: Double = 15.0
-        static let mapSpan: Double = 0.01
     }
 } 

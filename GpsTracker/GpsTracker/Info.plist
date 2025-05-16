@@ -6,11 +6,5 @@
 	<array>
 		<string>location</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We need your location to track your position while using the app.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>We need your location to track your position even when the app is in the background.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>We need your location to track your position even when the app is in the background.</string>
 </dict>
 </plist>

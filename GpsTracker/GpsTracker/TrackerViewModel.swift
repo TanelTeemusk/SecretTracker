@@ -9,30 +9,27 @@ import Foundation
 import CoreLocation
 import BackgroundTasks
 
-// MARK: - Supporting Types
-struct Coordinate: Codable {
-    let latitude: Double
-    let longitude: Double
-    let timestamp: Date
-    let accuracy: Double?
-}
-
 final class TrackerViewModel: NSObject, ObservableObject {
-    // MARK: - Public Methods
+    // MARK: - Public Variables
 
     @Published var isTracking = false
     var savedLocations: [StorageService.LocationData] {
         StorageService.shared.savedLocations
     }
 
-    // MARK: - Private Methods
+    // MARK: - Private Variables
     private var locationManager: CLLocationManager?
     private let apiService = APIService.shared
+    
+    private var retryTimer: Timer?
+    private let retryStateKey = "com.gpstracker.retryState"
+    private let trackingStateKey = "com.gpstracker.trackingState"
     
     override init() {
         super.init()
         setupLocationManager()
-        registerBackgroundTask()
+        isTracking = UserDefaults.standard.bool(forKey: trackingStateKey)
+        checkAndRescheduleRetry()
     }
     
     private func setupLocationManager() {
@@ -58,6 +55,7 @@ final class TrackerViewModel: NSObject, ObservableObject {
         case .authorizedAlways:
             locationManager.startUpdatingLocation()
             isTracking = true
+            UserDefaults.standard.set(true, forKey: trackingStateKey)
         case .denied, .restricted:
             // TODO: Make it show in UI
             print("Location access denied or restricted")
@@ -69,8 +67,10 @@ final class TrackerViewModel: NSObject, ObservableObject {
     func stopTracking() {
         locationManager?.stopUpdatingLocation()
         isTracking = false
-        postSavedLocation()
-        clearRetryState()
+        UserDefaults.standard.set(false, forKey: trackingStateKey)
+        retryTimer?.invalidate()
+        UserDefaults.standard.removeObject(forKey: retryStateKey)
+        scheduleRetryTask(after: 10)
     }
 }
 
@@ -112,9 +112,10 @@ extension TrackerViewModel: CLLocationManagerDelegate {
 // MARK: - Api access functionality
 extension TrackerViewModel {
     private func postSavedLocation() {
-        print("Posting saved location")
         guard let location = savedLocations.first else {
             print("No more locations to post")
+            retryTimer?.invalidate()
+            UserDefaults.standard.removeObject(forKey: retryStateKey)
             return
         }
 
@@ -122,60 +123,43 @@ extension TrackerViewModel {
         Task {
             do {
                 let response = try await apiService.call(with: request)
+                print("Response: \(response.description)")
                 if response.isSuccess {
                     StorageService.shared.removeFirstLocation()
                     postSavedLocation()
                 } else {
-                    scheduleRetry(with: 600)
+                    scheduleRetryTask(after: 600)
                 }
             } catch {
                 print("Failed to send coordinates: \(error.localizedDescription)")
-                scheduleRetry(with: 600)
+                scheduleRetryTask(after: 600)
             }
         }
     }
 }
 
-// MARK: - Location backend call retry functionality
+// MARK: - Scheduled retry functionality
 extension TrackerViewModel {
-    private func registerBackgroundTask() {
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.gpstracker.retry", using: nil) { task in
-            self.handleBackgroundRetry(task: task as! BGProcessingTask)
+    private func checkAndRescheduleRetry() {
+        if let retryDate = UserDefaults.standard.object(forKey: retryStateKey) as? Date {
+            let timeInterval = retryDate.timeIntervalSinceNow
+            if timeInterval > 0 {
+                scheduleRetryTask(after: Int(timeInterval))
+            } else {
+                postSavedLocation()
+            }
         }
     }
     
-    private func handleBackgroundRetry(task: BGProcessingTask) {
-        scheduleBackgroundRetry()
-
-        task.expirationHandler = {
-            task.setTaskCompleted(success: false)
-        }
+    func scheduleRetryTask(after seconds: Int) {
+        retryTimer?.invalidate()
         
-        Task {
-            await postSavedLocation()
-            task.setTaskCompleted(success: true)
-        }
-    }
-    
-    private func scheduleBackgroundRetry() {
-        let request = BGProcessingTaskRequest(identifier: "com.gpstracker.retry")
-        request.earliestBeginDate = Date(timeIntervalSinceNow: 600)
-        request.requiresNetworkConnectivity = true
+        // Store the retry time
+        let retryDate = Date().addingTimeInterval(TimeInterval(seconds))
+        UserDefaults.standard.set(retryDate, forKey: retryStateKey)
         
-        do {
-            try BGTaskScheduler.shared.submit(request)
-        } catch {
-            print("Could not schedule background retry: \(error)")
+        retryTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(seconds), repeats: false) { [weak self] _ in
+            self?.postSavedLocation()
         }
-    }
-    
-    private func scheduleRetry(with seconds: Int = 600) {
-        UserDefaults.standard.set(Date(), forKey: AppConfig.Storage.retryStateKey)
-        scheduleBackgroundRetry()
-    }
-    
-    private func clearRetryState() {
-        UserDefaults.standard.removeObject(forKey: AppConfig.Storage.retryStateKey)
-        BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: "com.gpstracker.retry")
     }
 }

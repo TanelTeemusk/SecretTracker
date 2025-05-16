@@ -40,16 +40,6 @@ final class StorageService {
 
         print("Saved location: \(newLocation.latitude), \(newLocation.longitude) at \(newLocation.createdDateTime), locations saved: \(locations.count)")
     }
-
-    func clearSavedLocations() {
-        UserDefaults.standard.removeObject(forKey: locationsKey)
-    }
-    
-    func getLocations(from startDate: Date, to endDate: Date) -> [LocationData] {
-        return savedLocations.filter { location in
-            location.createdDateTime >= startDate && location.createdDateTime <= endDate
-        }
-    }
     
     func removeFirstLocation() {
         var locations = savedLocations
