@@ -1,7 +1,9 @@
 <img src="app-icon-small.png" width="64" height="64">
 # SecretTracker 
 
-An iOS application for tracking and managing location data. This project was developed as a technical assessment for a leading Estonian technology company. I will not keep you posted if they saw this app to be worthy enough to include my iOS dev skills to their ranks or not. This repo will most likely be soon deleted so grab it while you can.
+An iOS application for tracking and managing location data. This project was developed as a technical assessment for a leading Estonian technology company. The architecture for such a small one screen app might look a bit of an overkill at first but the approach in building this app was to architect it as a good start for a bigger feature-rich app.
+
+I will not keep you posted if they saw this app to be worthy enough to include my iOS dev skills to their ranks or not. This repo will most likely be soon deleted so grab it while you can.
 
 ## Features
 
@@ -35,10 +37,12 @@ cd SecretTracker
 
 4. Build and run the project (⌘+R)
 
+> 💡 **Pro Tip**: If the app doesn't build, try turning your computer off and on again. It works 60% of the time, every time.
+
 ## Usage
 
 1. Launch the app
-2. Grant location permissions when prompted
+2. Grant location permissions when prompted (the data about your precise location will be sent to an obscure server in the internet)
 3. Toggle the tracking switch to start/stop location tracking
 4. The app will automatically handle:
    - Background location updates
