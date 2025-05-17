@@ -1,7 +1,7 @@
 <img src="app-icon-small.png" width="64" height="64">
 # SecretTracker 
 
-An iOS application for tracking and managing location data. This project was developed as a technical assessment for a leading Estonian technology company.
+An iOS application for tracking and managing location data. This project was developed as a technical assessment for a leading Estonian technology company. I will not keep you posted if they saw this app to be worthy enough to include my iOS dev skills to their ranks or not. This repo will most likely be soon deleted so grab it while you can.
 
 ## Features
 
