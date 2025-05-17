@@ -36,6 +36,11 @@ cd SecretTracker
 
 3. Open `SecretTracker.xcodeproj` in Xcode
 
+4. In Xcode open AppConfig.swift file and add your client secret between the quotes for clientSecret (we don't want to share this with the internet just yet)
+```
+static let clientSecret = "" // <-- Add your client secret here between quotes
+```
+
 4. Build and run the project (⌘+R)
 
 > 💡 **Pro Tip**: If the app doesn't build, try turning your computer off and on again. It works 60% of the time, every time.

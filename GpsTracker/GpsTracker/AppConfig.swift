@@ -24,7 +24,7 @@ enum AppConfig {
         
         enum OAuth {
             static let clientId = "test-app"
-            static let clientSecret = "388D45FA-B36B-4988-BA59-B187D329C207"
+            static let clientSecret = "" // Add client secret here
             static let grantType = "client_credentials"
         }
     }
