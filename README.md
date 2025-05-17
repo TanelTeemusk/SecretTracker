@@ -41,7 +41,7 @@ cd SecretTracker
 static let clientSecret = "" // <-- Add your client secret here between quotes
 ```
 
-4. Build and run the project (⌘+R)
+5. Build and run the project (⌘+R)
 
 > 💡 **Pro Tip**: If the app doesn't build, try turning your computer off and on again. It works 60% of the time, every time.
 
