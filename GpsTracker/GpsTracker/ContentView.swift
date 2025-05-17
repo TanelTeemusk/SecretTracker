@@ -16,13 +16,17 @@ struct ContentView: View {
                 .font(.system(size: 60))
                 .foregroundColor(Color(red: 109/255, green: 212/255, blue: 0/255))
                 .padding(.bottom, 10)
+                .accessibilityIdentifier("locationIcon")
+
             Text("GPS Tracker")
                 .font(.largeTitle)
                 .fontWeight(.bold)
+                .accessibilityIdentifier("appTitle")
 
             Text("This is a super secret and candid location tracking app that will send your location secretly to an obscure server. Press START button below to start the tracking process.")
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
+                .accessibilityIdentifier("appDescription")
 
             Button(action: {
                 if viewModel.isTracking {
@@ -39,6 +43,7 @@ struct ContentView: View {
                     .background(viewModel.statusErrorMessage != nil ? Color.gray.opacity(0.5) : (viewModel.isTracking ? Color.red : Color.blue))
                     .cornerRadius(10)
             }
+            .accessibilityIdentifier("trackingButton")
             .padding(.horizontal)
             .disabled(viewModel.statusErrorMessage != nil)
 
@@ -47,6 +52,7 @@ struct ContentView: View {
                     .foregroundColor(.red)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
+                    .accessibilityIdentifier("errorMessage")
             }
         }
         .padding()

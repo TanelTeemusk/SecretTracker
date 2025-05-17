@@ -14,11 +14,19 @@
 			remoteGlobalIDString = 51BB06B42DD7196800AC8ECF;
 			remoteInfo = GpsTracker;
 		};
+		51C330202DD889D400EC2581 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 51BB06AD2DD7196800AC8ECF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 51BB06B42DD7196800AC8ECF;
+			remoteInfo = GpsTracker;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		51BB06B52DD7196800AC8ECF /* GpsTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GpsTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51C330052DD872F500EC2581 /* GpsTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GpsTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		51C3301A2DD889D400EC2581 /* GpsTrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GpsTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -45,6 +53,11 @@
 			path = GpsTrackerTests;
 			sourceTree = "<group>";
 		};
+		51C3301B2DD889D400EC2581 /* GpsTrackerUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = GpsTrackerUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +75,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		51C330172DD889D400EC2581 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -70,6 +90,7 @@
 			children = (
 				51BB06B72DD7196800AC8ECF /* GpsTracker */,
 				51C330062DD872F500EC2581 /* GpsTrackerTests */,
+				51C3301B2DD889D400EC2581 /* GpsTrackerUITests */,
 				51BB06B62DD7196800AC8ECF /* Products */,
 			);
 			sourceTree = "<group>";
@@ -79,6 +100,7 @@
 			children = (
 				51BB06B52DD7196800AC8ECF /* GpsTracker.app */,
 				51C330052DD872F500EC2581 /* GpsTrackerTests.xctest */,
+				51C3301A2DD889D400EC2581 /* GpsTrackerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -131,6 +153,29 @@
 			productReference = 51C330052DD872F500EC2581 /* GpsTrackerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		51C330192DD889D400EC2581 /* GpsTrackerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 51C330222DD889D400EC2581 /* Build configuration list for PBXNativeTarget "GpsTrackerUITests" */;
+			buildPhases = (
+				51C330162DD889D400EC2581 /* Sources */,
+				51C330172DD889D400EC2581 /* Frameworks */,
+				51C330182DD889D400EC2581 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				51C330212DD889D400EC2581 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				51C3301B2DD889D400EC2581 /* GpsTrackerUITests */,
+			);
+			name = GpsTrackerUITests;
+			packageProductDependencies = (
+			);
+			productName = GpsTrackerUITests;
+			productReference = 51C3301A2DD889D400EC2581 /* GpsTrackerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -145,6 +190,10 @@
 						CreatedOnToolsVersion = 16.0;
 					};
 					51C330042DD872F500EC2581 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = 51BB06B42DD7196800AC8ECF;
+					};
+					51C330192DD889D400EC2581 = {
 						CreatedOnToolsVersion = 16.0;
 						TestTargetID = 51BB06B42DD7196800AC8ECF;
 					};
@@ -166,6 +215,7 @@
 			targets = (
 				51BB06B42DD7196800AC8ECF /* GpsTracker */,
 				51C330042DD872F500EC2581 /* GpsTrackerTests */,
+				51C330192DD889D400EC2581 /* GpsTrackerUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -179,6 +229,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		51C330032DD872F500EC2581 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		51C330182DD889D400EC2581 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -202,6 +259,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		51C330162DD889D400EC2581 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -209,6 +273,11 @@
 			isa = PBXTargetDependency;
 			target = 51BB06B42DD7196800AC8ECF /* GpsTracker */;
 			targetProxy = 51C330092DD872F500EC2581 /* PBXContainerItemProxy */;
+		};
+		51C330212DD889D400EC2581 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 51BB06B42DD7196800AC8ECF /* GpsTracker */;
+			targetProxy = 51C330202DD889D400EC2581 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -436,6 +505,40 @@
 			};
 			name = Release;
 		};
+		51C330232DD889D400EC2581 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4QK6J4R9ZF;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.teemusk.sandbox.GpsTrackerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = GpsTracker;
+			};
+			name = Debug;
+		};
+		51C330242DD889D400EC2581 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4QK6J4R9ZF;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.teemusk.sandbox.GpsTrackerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = GpsTracker;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -462,6 +565,15 @@
 			buildConfigurations = (
 				51C3300C2DD872F500EC2581 /* Debug */,
 				51C3300D2DD872F500EC2581 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		51C330222DD889D400EC2581 /* Build configuration list for PBXNativeTarget "GpsTrackerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				51C330232DD889D400EC2581 /* Debug */,
+				51C330242DD889D400EC2581 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

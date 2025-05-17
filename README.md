@@ -87,8 +87,3 @@ The app follows the MVVM (Model-View-ViewModel) architecture pattern and include
 - Implements proper memory management
 - Built with protocol-oriented architecture for enhanced testability and maintainability
 - Includes comprehensive unit tests for the main ViewModel, demonstrating test-driven development practices
-
-## TODO
-
-- Add UI tests for main user flows
-- Enhance test coverage for edge cases and all services
