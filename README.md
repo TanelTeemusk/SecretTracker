@@ -1,6 +1,6 @@
 <img src="app-icon-small.png" width="64" height="64">
 
-# SecretTracker 
+# SecretTracker (version 0.0.1)
 
 An iOS application for tracking and managing location data. This project was developed as a technical assessment for a leading Estonian technology company. The architecture for such a small one screen app might look a bit of an overkill at first but the approach in building this app was to architect it as a good start for a bigger feature-rich app.
 
