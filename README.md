@@ -1,2 +1,81 @@
-# SecretTracker
-Secret tracker app for iOS
+# SecretTracker <img src="app-icon-small.png" width="32" height="32">
+
+A professional iOS application for tracking and managing location data. This project was developed as a technical assessment for a leading Estonian technology company.
+
+## Features
+
+- Real-time GPS location tracking
+- Background location updates
+- Offline data storage with automatic synchronization
+- Automatic retry mechanism for failed API calls
+- Clean and intuitive user interface
+- Battery-efficient location tracking
+- Persistent tracking state across app restarts
+
+## Requirements
+
+- iOS 15.0+
+- Xcode 13.0+
+- Swift 5.5+
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/SecretTracker.git
+```
+
+2. Navigate to the project directory:
+```bash
+cd SecretTracker
+```
+
+3. Open `SecretTracker.xcodeproj` in Xcode
+
+4. Build and run the project (⌘+R)
+
+## Usage
+
+1. Launch the app
+2. Grant location permissions when prompted
+3. Toggle the tracking switch to start/stop location tracking
+4. The app will automatically handle:
+   - Background location updates
+   - Offline data storage
+   - Data synchronization when online
+   - Error recovery
+
+## Architecture
+
+The app follows the MVVM (Model-View-ViewModel) architecture pattern and includes:
+
+- **Services Layer**
+  - LocationService: Handles GPS tracking
+  - StorageService: Manages local data persistence
+  - APIService: Handles network communication
+  - All services are protocol-oriented for better testability and dependency injection
+
+- **View Layer**
+  - SwiftUI-based user interface
+  - Clean and responsive design
+
+- **ViewModel Layer**
+  - Business logic implementation
+  - State management
+  - Error handling
+
+## Technical Details
+
+- Written in Swift using SwiftUI
+- Uses CoreLocation for GPS tracking
+- Implements background task handling
+- Features automatic retry mechanism for failed API calls
+- Includes proper error handling and user feedback
+- Implements proper memory management
+- Built with protocol-oriented architecture for enhanced testability and maintainability
+- Includes comprehensive unit tests for the main ViewModel, demonstrating test-driven development practices
+
+## TODO
+
+- Add UI tests for main user flows
+- Enhance test coverage for edge cases and all services

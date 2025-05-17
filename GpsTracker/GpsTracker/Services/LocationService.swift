@@ -35,7 +35,7 @@ final class LocationService: NSObject, LocationServiceProtocol {
     }
 
     // MARK: - Private properties
-    private let locationManager = CLLocationManager()
+    private let locationManager: CLLocationManager
     private let minTimeInterval: TimeInterval
     private let distanceFilter: CLLocationDistance
     private var lastLocationUpdate: Date?
@@ -46,7 +46,8 @@ final class LocationService: NSObject, LocationServiceProtocol {
     private var errorHandler: ((Error) -> Void)?
 
     // MARK: - Initialization
-    init(minTimeInterval: TimeInterval = 10.0, distanceFilter: CLLocationDistance = 10.0) {
+    init(locationManager: CLLocationManager, minTimeInterval: TimeInterval = 10.0, distanceFilter: CLLocationDistance = 10.0) {
+        self.locationManager = locationManager
         self.minTimeInterval = minTimeInterval
         self.distanceFilter = distanceFilter
         super.init()

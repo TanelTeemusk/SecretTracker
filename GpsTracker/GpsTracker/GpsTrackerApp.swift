@@ -6,17 +6,26 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 @main
 struct GpsTrackerApp: App {
-    private let locationService = LocationService()
-    private let storageService = StorageService()
-    private let apiService = APIService()
+    private let locationService: LocationService
+    private let storageService: StorageService
+    private let apiService: APIService
+    private let viewModel: TrackerViewModel
 
-    private var viewModel: TrackerViewModel {
-        TrackerViewModel(locationService: locationService,
-                         storageService: storageService,
-                         apiService: apiService)
+    init() {
+        // Default initialization
+        let locationManager = CLLocationManager()
+        self.locationService = LocationService(locationManager: locationManager)
+        self.storageService = StorageService()
+        self.apiService = APIService()
+        self.viewModel = TrackerViewModel(
+            locationService: locationService,
+            storageService: storageService,
+            apiService: apiService
+        )
     }
 
     var body: some Scene {
