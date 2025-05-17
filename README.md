@@ -1,4 +1,5 @@
-# SecretTracker <img src="app-icon-small.png" width="32" height="32">
+<img src="app-icon-small.png" width="64" height="64">
+# SecretTracker 
 
 A professional iOS application for tracking and managing location data. This project was developed as a technical assessment for a leading Estonian technology company.
 
