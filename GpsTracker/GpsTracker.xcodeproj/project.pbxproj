@@ -269,6 +269,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GpsTracker/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Secret Tracker";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "We need your location to track your position even when the app is in the background.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "We need your location to track your position even when the app is in the background.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to track your position while using the app.";
@@ -302,6 +303,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GpsTracker/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Secret Tracker";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "We need your location to track your position even when the app is in the background.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "We need your location to track your position even when the app is in the background.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to track your position while using the app.";

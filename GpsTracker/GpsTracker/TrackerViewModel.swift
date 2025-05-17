@@ -7,104 +7,96 @@
 
 import Foundation
 import CoreLocation
-import BackgroundTasks
 
-final class TrackerViewModel: NSObject, ObservableObject {
+protocol TrackerViewModelProtocol {
+    var isTracking: Bool { get }
+    var statusErrorMessage: String? { get }
+    func startTracking()
+    func stopTracking()
+}
+
+final class TrackerViewModel: NSObject, TrackerViewModelProtocol, ObservableObject {
     // MARK: - Public Variables
-
     @Published var isTracking = false
-    var savedLocations: [StorageService.LocationData] {
-        StorageService.shared.savedLocations
-    }
+    @Published var statusErrorMessage: String?
 
     // MARK: - Private Variables
-    private var locationManager: CLLocationManager?
-    private let apiService = APIService.shared
-    
+    private let locationService: LocationServiceProtocol
+    private let apiService: APIServiceProtocol
+    private let storageService: StorageServiceProtocol
+
+
     private var retryTimer: Timer?
     private let retryStateKey = "com.gpstracker.retryState"
     private let trackingStateKey = "com.gpstracker.trackingState"
-    
-    override init() {
+
+    init(locationService: LocationServiceProtocol,
+         storageService: StorageServiceProtocol,
+         apiService: APIServiceProtocol) {
+        self.locationService = locationService
+        self.storageService = storageService
+        self.apiService = apiService
         super.init()
-        setupLocationManager()
         isTracking = UserDefaults.standard.bool(forKey: trackingStateKey)
+        if isTracking { startTracking() }
         checkAndRescheduleRetry()
     }
-    
-    private func setupLocationManager() {
-        locationManager = CLLocationManager()
-        locationManager?.delegate = self
-        locationManager?.allowsBackgroundLocationUpdates = true
-        locationManager?.pausesLocationUpdatesAutomatically = false
-        locationManager?.desiredAccuracy = kCLLocationAccuracyBest
-        // locationManager?.distanceFilter = 10
-        locationManager?.activityType = .other
-    }
-    
-    func startTracking() {
-        guard let locationManager = locationManager else {
-            fatalError("locationManager doesn't exist. Make sure you setup LocationManager before you start tracking.")
-        }
 
-        switch locationManager.authorizationStatus {
-        case .notDetermined:
-            locationManager.requestAlwaysAuthorization()
-        case .authorizedWhenInUse:
-            locationManager.requestAlwaysAuthorization()
-        case .authorizedAlways:
-            locationManager.startUpdatingLocation()
-            isTracking = true
-            UserDefaults.standard.set(true, forKey: trackingStateKey)
-        case .denied, .restricted:
-            // TODO: Make it show in UI
-            print("Location access denied or restricted")
-        @unknown default:
-            break
-        }
-    }
-    
-    func stopTracking() {
-        locationManager?.stopUpdatingLocation()
-        isTracking = false
-        UserDefaults.standard.set(false, forKey: trackingStateKey)
+    deinit {
         retryTimer?.invalidate()
-        UserDefaults.standard.removeObject(forKey: retryStateKey)
-        scheduleRetryTask(after: 10)
+        locationService.stopUpdatingLocation()
     }
 }
 
-extension TrackerViewModel: CLLocationManagerDelegate {
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last else { return }
+// MARK: - Location tracking
+extension TrackerViewModel {
+    func startTracking() {
+        statusErrorMessage = nil
 
-        if let lastSavedLocation = savedLocations.last {
-            let currentTime = Date()
-            let timeInterval = currentTime.timeIntervalSince(lastSavedLocation.createdDateTime)
-            if timeInterval < 10 {
-                return
-            }
+        configureLocationTracking()
+
+        if locationService.isAuthorized {
+            isTracking = true
+            UserDefaults.standard.set(true, forKey: trackingStateKey)
+        } else {
+            stopTracking()
+            statusErrorMessage = "We are unable to update your location at the moment. Are you sure our app is authorized to receive location updates in the iOS settings?"
         }
 
-        StorageService.shared.saveLocation(location)
+        locationService.requestAuthorization()
     }
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Location manager failed with error: \(error.localizedDescription)")
+
+    func stopTracking() {
+        locationService.stopUpdatingLocation()
+        isTracking = false
+        UserDefaults.standard.set(false, forKey: trackingStateKey)
+
+        dismissRetryTask()
+        postSavedLocation()
     }
-    
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        switch manager.authorizationStatus {
-        case .authorizedAlways:
-            break
-        case .authorizedWhenInUse:
-            locationManager?.requestAlwaysAuthorization()
-        case .denied, .restricted:
-            isTracking = false
-        case .notDetermined:
-            break
-        @unknown default:
-            break
+
+    private func configureLocationTracking() {
+        locationService.startUpdatingLocation(
+            onUpdate: { [weak self] location in
+                self?.storageService.saveLocation(location)
+            },
+            onAuthChange: { [weak self] status in
+                self?.handleAuthorizationChange(status)
+            },
+            onError: { [weak self] error in
+                self?.stopTracking()
+                self?.statusErrorMessage = "We are unable to update your location at the moment. Are you sure our app is authorized to receive location updates in the iOS settings?"
+            }
+        )
+    }
+
+    private func handleAuthorizationChange(_ status: CLAuthorizationStatus) {
+        statusErrorMessage = nil
+        if status == .authorizedAlways && isTracking {
+            configureLocationTracking()
+        } else if status == .denied || status == .restricted {
+            stopTracking()
+            statusErrorMessage = "Location access denied. Please enable it in your phone settings."
         }
     }
 }
@@ -112,27 +104,27 @@ extension TrackerViewModel: CLLocationManagerDelegate {
 // MARK: - Api access functionality
 extension TrackerViewModel {
     private func postSavedLocation() {
-        guard let location = savedLocations.first else {
-            print("No more locations to post")
-            retryTimer?.invalidate()
-            UserDefaults.standard.removeObject(forKey: retryStateKey)
+        let locations = storageService.savedLocations
+        if locations.isEmpty {
+            dismissRetryTask()
             return
         }
 
-        let request = ApiRequest(endpoint: .coordinates, method: .post, body: location)
+        let request = APIService.Request(endpoint: .coordinates,
+                                         method: .post,
+                                         body: locations)
         Task {
             do {
                 let response = try await apiService.call(with: request)
                 print("Response: \(response.description)")
                 if response.isSuccess {
-                    StorageService.shared.removeFirstLocation()
-                    postSavedLocation()
+                    storageService.removeAllLocations()
                 } else {
-                    scheduleRetryTask(after: 600)
+                    scheduleRetryTask(after: AppConfig.Main.apiFailRetryInterval)
                 }
             } catch {
                 print("Failed to send coordinates: \(error.localizedDescription)")
-                scheduleRetryTask(after: 600)
+                scheduleRetryTask(after: AppConfig.Main.apiFailRetryInterval)
             }
         }
     }
@@ -150,16 +142,21 @@ extension TrackerViewModel {
             }
         }
     }
-    
+
     func scheduleRetryTask(after seconds: Int) {
         retryTimer?.invalidate()
-        
+
         // Store the retry time
         let retryDate = Date().addingTimeInterval(TimeInterval(seconds))
         UserDefaults.standard.set(retryDate, forKey: retryStateKey)
-        
+
         retryTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(seconds), repeats: false) { [weak self] _ in
             self?.postSavedLocation()
         }
+    }
+
+    func dismissRetryTask() {
+        retryTimer?.invalidate()
+        UserDefaults.standard.removeObject(forKey: retryStateKey)
     }
 }

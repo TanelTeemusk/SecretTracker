@@ -6,21 +6,24 @@
 //
 
 import SwiftUI
-import CoreLocation
 
 struct ContentView: View {
-    @StateObject private var viewModel = TrackerViewModel()
-    
+    @EnvironmentObject private var viewModel: TrackerViewModel
+
     var body: some View {
         VStack(spacing: 20) {
+            Image(systemName: "location.viewfinder")
+                .font(.system(size: 60))
+                .foregroundColor(Color(red: 109/255, green: 212/255, blue: 0/255))
+                .padding(.bottom, 10)
             Text("GPS Tracker")
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            
+
             Text("This is a super secret and candid location tracking app that will send your location secretly to an obscure server. Press START button below to start the tracking process.")
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
-            
+
             Button(action: {
                 if viewModel.isTracking {
                     viewModel.stopTracking()
@@ -33,10 +36,18 @@ struct ContentView: View {
                     .foregroundColor(.white)
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background(viewModel.isTracking ? Color.red : Color.blue)
+                    .background(viewModel.statusErrorMessage != nil ? Color.gray.opacity(0.5) : (viewModel.isTracking ? Color.red : Color.blue))
                     .cornerRadius(10)
             }
             .padding(.horizontal)
+            .disabled(viewModel.statusErrorMessage != nil)
+
+            if let errorMessage = viewModel.statusErrorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
         }
         .padding()
     }

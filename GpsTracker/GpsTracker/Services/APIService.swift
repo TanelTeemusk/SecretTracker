@@ -1,79 +1,105 @@
+//
+//  APIService.swift
+//  GpsTracker
+//
+//  Created by tanel teemusk on 16.05.2025.
+//
+
 import CoreLocation
 import Foundation
 
-enum APIError: Error {
-    case invalidURL
-    case invalidResponse
-    case networkError(Error)
+protocol APIServiceProtocol {
+    func call(with request: APIService.Request) async throws -> APIService.Response
 }
 
-enum HTTPMethod: String {
-    case get = "GET"
-    case post = "POST"
-}
-
-struct ApiRequest {
-    let endpoint: AppConfig.API.Endpoints
-    let method: HTTPMethod
-    let body: Codable
-}
-
-struct APIResponse {
-    let isSuccess: Bool
-    let statusCode: Int
-    let message: String?
-    
-    var description: String {
-        let status = isSuccess ? "✅ Success" : "❌ Failure"
-        let statusCodeInfo = "Status Code: \(statusCode)"
-        let messageInfo = message.map { "Message: \($0)" } ?? "No message"
-        
-        return """
-        \(status)
-        \(statusCodeInfo)
-        \(messageInfo)
-        """
-    }
-    
-    static func success(statusCode: Int, message: String? = nil) -> APIResponse {
-        return APIResponse(isSuccess: true, statusCode: statusCode, message: message)
-    }
-    
-    static func failure(statusCode: Int, message: String? = nil) -> APIResponse {
-        return APIResponse(isSuccess: false, statusCode: statusCode, message: message)
-    }
-}
-
-final class APIService {
-    static let shared = APIService()
-
+final class APIService: APIServiceProtocol {
     private var accessToken: String?
     private var tokenExpirationDate: Date?
 
-    private init() {}
+    enum Error: Swift.Error {
+        case invalidURL
+        case invalidResponse
+        case networkError(Swift.Error)
+    }
 
-    // MARK: - Request Handler
+    enum HTTPMethod: String {
+        case get = "GET"
+        case post = "POST"
+    }
 
-    private func performRequest(_ request: URLRequest) async throws -> APIResponse {
-        let (data, response) = try await URLSession.shared.data(for: request)
+    struct Request {
+        let endpoint: AppConfig.API.Endpoints
+        let method: HTTPMethod
+        let body: Codable
+    }
 
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.invalidResponse
+    struct Response {
+        let isSuccess: Bool
+        let statusCode: Int
+        let message: String?
+
+        var description: String {
+            let status = isSuccess ? "✅ Success" : "❌ Failure"
+            let statusCodeInfo = "Status Code: \(statusCode)"
+            let messageInfo = message.map { "Message: \($0)" } ?? "No message"
+
+            return """
+            \(status)
+            \(statusCodeInfo)
+            \(messageInfo)
+            """
         }
-        
-        if (200...299).contains(httpResponse.statusCode) {
-            return APIResponse.success(statusCode: httpResponse.statusCode)
-        } else {
-            return APIResponse.failure(statusCode: httpResponse.statusCode)
+
+        static func success(statusCode: Int, message: String? = nil) -> Response {
+            return Response(isSuccess: true, statusCode: statusCode, message: message)
+        }
+
+        static func failure(statusCode: Int, message: String? = nil) -> Response {
+            return Response(isSuccess: false, statusCode: statusCode, message: message)
         }
     }
 
-    // MARK: - OAuth Token Management
+    func call(with request: Request) async throws -> Response {
+        let token = try await getValidToken()
 
+        guard let url = URL(string: AppConfig.API.baseURL+request.endpoint.rawValue) else {
+            throw Error.invalidURL
+        }
+
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = request.method.rawValue
+        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        if request.method == .post {
+            let encoder = JSONEncoder()
+            urlRequest.httpBody = try encoder.encode(request.body)
+        }
+
+        return try await performRequest(urlRequest)
+    }
+
+    private func performRequest(_ request: URLRequest) async throws -> Response {
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw Error.invalidResponse
+        }
+
+        if (200...299).contains(httpResponse.statusCode) {
+            return Response.success(statusCode: httpResponse.statusCode)
+        } else {
+            return Response.failure(statusCode: httpResponse.statusCode)
+        }
+    }
+}
+
+// MARK: - Token
+private extension APIService {
     func getValidToken() async throws -> String {
         if let token = accessToken,
-            let expirationDate = tokenExpirationDate,
-            expirationDate > Date()
+           let expirationDate = tokenExpirationDate,
+           expirationDate > Date()
         {
             return token
         }
@@ -81,9 +107,9 @@ final class APIService {
         return try await fetchNewToken()
     }
 
-    private func fetchNewToken() async throws -> String {
+    func fetchNewToken() async throws -> String {
         guard let url = URL(string: AppConfig.API.baseURL + AppConfig.API.Endpoints.oauth.rawValue) else {
-            throw APIError.invalidURL
+            throw Error.invalidURL
         }
 
         var request = URLRequest(url: url)
@@ -97,7 +123,7 @@ final class APIService {
         ]
 
         request.httpBody =
-            parameters
+        parameters
             .map { "\($0.key)=\($0.value)" }
             .joined(separator: "&")
             .data(using: String.Encoding.utf8)
@@ -108,42 +134,20 @@ final class APIService {
         }
 
         let (data, response) = try await URLSession.shared.data(for: request)
-        
+
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.invalidResponse
+            throw Error.invalidResponse
         }
-        
+
         guard (200...299).contains(httpResponse.statusCode) else {
-            throw APIError.invalidResponse
+            throw Error.invalidResponse
         }
-        
+
         let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: data)
 
         accessToken = tokenResponse.access_token
         tokenExpirationDate = Date().addingTimeInterval(TimeInterval(tokenResponse.expires_in))
 
         return tokenResponse.access_token
-    }
-
-    // MARK: - API Endpoints
-
-    func call(with request: ApiRequest) async throws -> APIResponse {
-        let token = try await getValidToken()
-        
-        guard let url = URL(string: AppConfig.API.baseURL+request.endpoint.rawValue) else {
-            throw APIError.invalidURL
-        }
-        
-        var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = request.method.rawValue
-        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        if request.method == .post {
-            let encoder = JSONEncoder()
-            urlRequest.httpBody = try encoder.encode(request.body)
-        }
-        
-        return try await performRequest(urlRequest)
     }
 }

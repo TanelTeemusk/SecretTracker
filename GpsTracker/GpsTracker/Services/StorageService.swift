@@ -1,23 +1,35 @@
+//
+//  StorageService.swift
+//  GpsTracker
+//
+//  Created by tanel teemusk on 16.05.2025.
+//
+
 import Foundation
 import CoreLocation
 
-final class StorageService {
-    static let shared = StorageService()
+protocol StorageServiceProtocol {
+    var savedLocations: [LocationData] { get }
+    func saveLocation(_ location: CLLocation)
+    func removeAllLocations()
+}
 
+final class StorageService: StorageServiceProtocol {
     // MARK: - Public Variables
     var savedLocations: [LocationData] {
-        if let data = UserDefaults.standard.data(forKey: locationsKey),
-           let locations = try? JSONDecoder().decode([LocationData].self, from: data) {
+        if let data = userDefaults.data(forKey: AppConfig.Storage.locationDataKey),
+           let locations = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSArray.self, LocationData.self], from: data) as? [LocationData] {
             return locations
         }
         return []
     }
 
     // MARK: - Private Variables
-    private let locationsKey = "savedLocations"
-    private let maxLocations = 100
+    private let userDefaults: UserDefaults
 
-    private init() {}
+    init(userDefaults: UserDefaults = .standard) {
+        self.userDefaults = userDefaults
+    }
 
     func saveLocation(_ location: CLLocation) {
         let newLocation = LocationData(
@@ -25,30 +37,22 @@ final class StorageService {
             longitude: location.coordinate.longitude,
             createdDateTime: location.timestamp
         )
-        
+
         var locations = savedLocations
         locations.append(newLocation)
-        
-        // Keep only the last maxLocations entries
-        if locations.count > maxLocations {
-            locations = Array(locations.suffix(maxLocations))
+
+        if locations.count > AppConfig.Storage.maxStoredLocations {
+            locations = Array(locations.suffix(AppConfig.Storage.maxStoredLocations))
         }
-        
-        if let encoded = try? JSONEncoder().encode(locations) {
-            UserDefaults.standard.set(encoded, forKey: locationsKey)
+
+        if let archived = try? NSKeyedArchiver.archivedData(withRootObject: locations, requiringSecureCoding: true) {
+            userDefaults.set(archived, forKey: AppConfig.Storage.locationDataKey)
         }
 
         print("Saved location: \(newLocation.latitude), \(newLocation.longitude) at \(newLocation.createdDateTime), locations saved: \(locations.count)")
     }
-    
-    func removeFirstLocation() {
-        var locations = savedLocations
-        guard !locations.isEmpty else { return }
-        
-        locations.removeFirst()
-        
-        if let encoded = try? JSONEncoder().encode(locations) {
-            UserDefaults.standard.set(encoded, forKey: locationsKey)
-        }
+
+    func removeAllLocations() {
+        userDefaults.removeObject(forKey: AppConfig.Storage.locationDataKey)
     }
-} 
+}
